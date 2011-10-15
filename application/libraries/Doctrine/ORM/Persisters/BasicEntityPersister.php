@@ -823,7 +823,7 @@ class BasicEntityPersister
                     
                     if (isset($sourceClass->associationMappings[$field])) {
                         $value = $this->_em->getUnitOfWork()->getEntityIdentifier($value);
-                        $value = $value[$this->_em->getClassMetadata($assoc['targetEntity'])->identifier[0]];
+                        $value = $value[$this->_em->getClassMetadata($sourceClass->associationMappings[$field]['targetEntity'])->identifier[0]];
                     }
 
                     $criteria[$quotedJoinTable . "." . $relationKeyColumn] = $value;
@@ -847,7 +847,7 @@ class BasicEntityPersister
                     
                     if (isset($sourceClass->associationMappings[$field])) {
                         $value = $this->_em->getUnitOfWork()->getEntityIdentifier($value);
-                        $value = $value[$this->_em->getClassMetadata($assoc['targetEntity'])->identifier[0]];
+                        $value = $value[$this->_em->getClassMetadata($sourceClass->associationMappings[$field]['targetEntity'])->identifier[0]];
                     }
                     
                     $criteria[$quotedJoinTable . "." . $relationKeyColumn] = $value;
@@ -1060,10 +1060,10 @@ class BasicEntityPersister
                 if ($columnList) $columnList .= ', ';
 
                 $columnAlias = $srcColumn . $this->_sqlAliasCounter++;
-                $columnList .= $this->_getSQLTableAlias($class->name, ($alias == 'r' ? '' : $alias) )  
-                             . '.' . $srcColumn . ' AS ' . $columnAlias;
                 $resultColumnName = $this->_platform->getSQLResultCasing($columnAlias);
-                $this->_rsm->addMetaResult($alias, $this->_platform->getSQLResultCasing($columnAlias), $srcColumn, isset($assoc['id']) && $assoc['id'] === true);
+                $columnList .= $this->_getSQLTableAlias($class->name, ($alias == 'r' ? '' : $alias) )  
+                             . '.' . $srcColumn . ' AS ' . $resultColumnName;
+                $this->_rsm->addMetaResult($alias, $resultColumnName, $srcColumn, isset($assoc['id']) && $assoc['id'] === true);
             }
         }
         
@@ -1355,7 +1355,7 @@ class BasicEntityPersister
                 
                 if (isset($sourceClass->associationMappings[$field])) {
                     $value = $this->_em->getUnitOfWork()->getEntityIdentifier($value);
-                    $value = $value[$this->_em->getClassMetadata($assoc['targetEntity'])->identifier[0]];
+                    $value = $value[$this->_em->getClassMetadata($sourceClass->associationMappings[$field]['targetEntity'])->identifier[0]];
                 }
                 
                 $criteria[$tableAlias . "." . $targetKeyColumn] = $value;
