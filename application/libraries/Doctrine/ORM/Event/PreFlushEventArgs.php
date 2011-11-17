@@ -1,5 +1,7 @@
 <?php
 /*
+ *  $Id$
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -19,59 +21,33 @@
 
 namespace Doctrine\ORM\Event;
 
-use Doctrine\Common\EventArgs;
-use Doctrine\ORM\EntityManager;
-
 /**
- * Lifecycle Events are triggered by the UnitOfWork during lifecycle transitions
- * of entities.
+ * Provides event arguments for the preFlush event.
  *
- * @link   www.doctrine-project.org
- * @since  2.0
- * @author Roman Borschel <roman@code-factory.de>
- * @author Benjamin Eberlei <kontakt@beberlei.de>
+ * @license     http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @link        www.doctrine-project.com
+ * @since       2.0
+ * @version     $Revision$
+ * @author      Roman Borschel <roman@code-factory.de>
+ * @author      Benjamin Eberlei <kontakt@beberlei.de>
  */
-class LifecycleEventArgs extends EventArgs
+class PreFlushEventArgs extends \Doctrine\Common\EventArgs
 {
     /**
-     * @var Doctrine\ORM\EntityManager
+     * @var EntityManager
      */
-    private $em;
+    private $_em;
 
-    /**
-     * @var object
-     */
-    private $entity;
-    
-    /**
-     * Constructor
-     * 
-     * @param object $entity
-     * @param Doctrine\ORM\EntityManager $em 
-     */
-    public function __construct($entity, EntityManager $em)
+    public function __construct($em)
     {
-        $this->entity = $entity;
-        $this->em     = $em;
-    }
-    
-    /**
-     * Retireve associated Entity.
-     * 
-     * @return object 
-     */
-    public function getEntity()
-    {
-        return $this->entity;
+        $this->_em = $em;
     }
 
     /**
-     * Retrieve associated EntityManager.
-     * 
-     * @return Doctrine\ORM\EntityManager
+     * @return EntityManager
      */
     public function getEntityManager()
     {
-        return $this->em;
+        return $this->_em;
     }
 }

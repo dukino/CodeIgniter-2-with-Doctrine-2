@@ -288,7 +288,7 @@ class MappingException extends \Doctrine\ORM\ORMException
     public static function mappedClassNotPartOfDiscriminatorMap($className, $rootClassName)
     {
         return new self(
-            "Entity '" . $className . "' has to be part of the descriminator map of '" . $rootClassName . "' " .
+            "Entity '" . $className . "' has to be part of the discriminator map of '" . $rootClassName . "' " .
             "to be properly mapped in the inheritance hierachy. Alternatively you can make '".$className."' an abstract class " .
             "to avoid this exception from occuring."
         );
@@ -297,5 +297,10 @@ class MappingException extends \Doctrine\ORM\ORMException
     public static function lifecycleCallbackMethodNotFound($className, $methodName)
     {
         return new self("Entity '" . $className . "' has no method '" . $methodName . "' to be registered as lifecycle callback.");
+    }
+
+    public static function invalidFetchMode($className, $annotation)
+    {
+        return new self("Entity '" . $className . "' has a mapping with invalid fetch mode '" . $annotation . "'");
     }
 }

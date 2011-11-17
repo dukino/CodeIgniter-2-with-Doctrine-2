@@ -312,6 +312,10 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
             if ($parent && $parent->containsForeignIdentifier) {
                 $class->containsForeignIdentifier = true;
             }
+            
+            if ($parent && !empty ($parent->namedQueries)) {
+                $this->addInheritedNamedQueries($class, $parent);
+            }
 
             $class->setParentClasses($visited);
 
@@ -428,6 +432,25 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
             $subClass->addInheritedAssociationMapping($mapping);
         }
     }
+    
+    /**
+     * Adds inherited named queries to the subclass mapping.
+     * 
+     * @since 2.2
+     * @param Doctrine\ORM\Mapping\ClassMetadata $subClass
+     * @param Doctrine\ORM\Mapping\ClassMetadata $parentClass
+     */
+    private function addInheritedNamedQueries(ClassMetadata $subClass, ClassMetadata $parentClass)
+    {
+        foreach ($parentClass->namedQueries as $name => $query) {
+            if (!isset ($subClass->namedQueries[$name])) {
+                $subClass->addNamedQuery(array(
+                    'name'  => $query['name'],
+                    'query' => $query['query']
+                ));
+            }
+        }
+    }
 
     /**
      * Completes the ID generator mapping. If "auto" is specified we choose the generator
@@ -494,6 +517,10 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
      */
     public function isTransient($class)
     {
+        if ( ! $this->initialized) {
+            $this->initialize();
+        }
+        
         return $this->driver->isTransient($class);
     }
 }
