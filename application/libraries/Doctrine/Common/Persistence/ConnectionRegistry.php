@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -19,78 +17,46 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\Common\Cache;
+namespace Doctrine\Common\Persistence;
 
 /**
- * Array cache driver.
+ * Contract covering connection for a Doctrine persistence layer ManagerRegistry class to implement.
  *
  * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link    www.doctrine-project.org
- * @since   2.0
+ * @since   2.2
  * @author  Benjamin Eberlei <kontakt@beberlei.de>
- * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
- * @author  Jonathan Wage <jonwage@gmail.com>
- * @author  Roman Borschel <roman@code-factory.org>
- * @author  David Abdemoulaie <dave@hobodave.com>
+ * @author  Lukas Kahwe Smith <smith@pooteeweet.org>
  */
-class ArrayCache extends CacheProvider
+interface ConnectionRegistry
 {
     /**
-     * @var array $data
+     * Gets the default connection name.
+     *
+     * @return string The default connection name
      */
-    private $data = array();
+    function getDefaultConnectionName();
 
     /**
-     * {@inheritdoc}
+     * Gets the named connection.
+     *
+     * @param string $name The connection name (null for the default one)
+     *
+     * @return Connection
      */
-    protected function doFetch($id)
-    {
-        return (isset($this->data[$id])) ? $this->data[$id] : false;
-    }
+    function getConnection($name = null);
 
     /**
-     * {@inheritdoc}
+     * Gets an array of all registered connections
+     *
+     * @return array An array of Connection instances
      */
-    protected function doContains($id)
-    {
-        return isset($this->data[$id]);
-    }
+    function getConnections();
 
     /**
-     * {@inheritdoc}
+     * Gets all connection names.
+     *
+     * @return array An array of connection names
      */
-    protected function doSave($id, $data, $lifeTime = 0)
-    {
-        $this->data[$id] = $data;
-
-        return true;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function doDelete($id)
-    {
-        unset($this->data[$id]);
-        
-        return true;
-    }
-    
-    /**
-     * {@inheritdoc}
-     */
-    protected function doFlush()
-    {
-        $this->data = array();
-        
-        return true;
-    }
-    
-    /**
-     * {@inheritdoc}
-     */
-    protected function doGetStats()
-    {
-        return null;
-    }
+    function getConnectionNames();
 }
