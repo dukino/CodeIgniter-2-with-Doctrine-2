@@ -25,10 +25,11 @@ namespace Doctrine\Common\Persistence;
  * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link    www.doctrine-project.org
  * @since   2.2
+ * @author  Fabien Potencier <fabien@symfony.com>
  * @author  Benjamin Eberlei <kontakt@beberlei.de>
  * @author  Lukas Kahwe Smith <smith@pooteeweet.org>
  */
-interface ManagerRegistry
+interface ManagerRegistry extends ConnectionRegistry
 {
     /**
      * Gets the default object manager name.
