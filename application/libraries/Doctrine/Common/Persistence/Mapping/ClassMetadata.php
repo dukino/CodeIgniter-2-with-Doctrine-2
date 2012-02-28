@@ -103,6 +103,13 @@ interface ClassMetadata
     function getFieldNames();
 
     /**
+     * Returns an array of identifier field names numerically indexed.
+     *
+     * @return array
+     */
+    function getIdentifierFieldNames();
+
+    /**
      * A numerically indexed list of association names of this persistent class.
      *
      * This array includes identifier associations if present on this class.
@@ -130,7 +137,29 @@ interface ClassMetadata
      */
     function getAssociationTargetClass($assocName);
 
+    /**
+     * Checks if the association is the inverse side of a bidirectional association
+     *
+     * @param string $assocName
+     * @return boolean
+     */
     function isAssociationInverseSide($assocName);
 
+    /**
+     * Returns the target field of the owning side of the association
+     *
+     * @param string $assocName
+     * @return string
+     */
     function getAssociationMappedByTargetField($assocName);
+
+    /**
+     * Return the identifier of this object as an array with field name as key.
+     *
+     * Has to return an empty array if no identifier isset.
+     *
+     * @param object $object
+     * @return array
+     */
+    function getIdentifierValues($object);
 }

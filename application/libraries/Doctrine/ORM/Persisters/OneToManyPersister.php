@@ -119,8 +119,9 @@ class OneToManyPersister extends AbstractCollectionPersister
                 : $id[$sourceClass->fieldNames[$joinColumn['referencedColumnName']]];
         }
 
+        $filterTargetClass = $this->_em->getClassMetadata($targetClass->rootEntityName);
         foreach ($this->_em->getFilters()->getEnabledFilters() as $filter) {
-            if ($filterExpr = $filter->addFilterConstraint($targetClass, 't')) {
+            if ($filterExpr = $filter->addFilterConstraint($filterTargetClass, 't')) {
                 $whereClauses[] = '(' . $filterExpr . ')';
             }
         }
@@ -158,7 +159,14 @@ class OneToManyPersister extends AbstractCollectionPersister
         $uow     = $this->_em->getUnitOfWork();
 
         // shortcut for new entities
-        if ($uow->getEntityState($element, UnitOfWork::STATE_NEW) == UnitOfWork::STATE_NEW) {
+        $entityState = $uow->getEntityState($element, UnitOfWork::STATE_NEW);
+
+        if ($entityState === UnitOfWork::STATE_NEW) {
+            return false;
+        }
+
+        // Entity is scheduled for inclusion
+        if ($entityState === UnitOfWork::STATE_MANAGED && $uow->isScheduledForInsert($element)) {
             return false;
         }
 
@@ -167,7 +175,7 @@ class OneToManyPersister extends AbstractCollectionPersister
         // only works with single id identifier entities. Will throw an
         // exception in Entity Persisters if that is not the case for the
         // 'mappedBy' field.
-        $id = current( $uow->getEntityIdentifier($coll->getOwner()) );
+        $id = current( $uow->getEntityIdentifier($coll->getOwner()));
 
         return $persister->exists($element, array($mapping['mappedBy'] => $id));
     }
@@ -182,7 +190,15 @@ class OneToManyPersister extends AbstractCollectionPersister
         $uow = $this->_em->getUnitOfWork();
 
         // shortcut for new entities
-        if ($uow->getEntityState($element, UnitOfWork::STATE_NEW) == UnitOfWork::STATE_NEW) {
+        $entityState = $uow->getEntityState($element, UnitOfWork::STATE_NEW);
+
+        if ($entityState === UnitOfWork::STATE_NEW) {
+            return false;
+        }
+
+        // If Entity is scheduled for inclusion, it is not in this collection.
+        // We can assure that because it would have return true before on array check
+        if ($entityState === UnitOfWork::STATE_MANAGED && $uow->isScheduledForInsert($element)) {
             return false;
         }
 

@@ -40,26 +40,26 @@ class MsSqlPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateDiffExpression($date1, $date2)    
+    public function getDateDiffExpression($date1, $date2)
     {
         return 'DATEDIFF(day, ' . $date2 . ',' . $date1 . ')';
     }
-    
+
     public function getDateAddDaysExpression($date, $days)
     {
         return 'DATEADD(day, ' . $days . ', ' . $date . ')';
     }
-    
+
     public function getDateSubDaysExpression($date, $days)
     {
         return 'DATEADD(day, -1 * ' . $days . ', ' . $date . ')';
     }
-    
+
     public function getDateAddMonthExpression($date, $months)
     {
         return 'DATEADD(month, ' . $months . ', ' . $date . ')';
     }
-    
+
     public function getDateSubMonthExpression($date, $months)
     {
         return 'DATEADD(month, -1 * ' . $months . ', ' . $date . ')';
@@ -278,20 +278,33 @@ class MsSqlPlatform extends AbstractPlatform
     {
         $queryParts = array();
         $sql = array();
-        
+        $columnSql = array();
+
         if ($diff->newName !== false) {
             $queryParts[] = 'RENAME TO ' . $diff->newName;
         }
 
         foreach ($diff->addedColumns AS $fieldName => $column) {
+            if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
+                continue;
+            }
+
             $queryParts[] = 'ADD ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $column->toArray());
         }
 
         foreach ($diff->removedColumns AS $column) {
+            if ($this->onSchemaAlterTableRemoveColumn($column, $diff, $columnSql)) {
+                continue;
+            }
+
             $queryParts[] = 'DROP COLUMN ' . $column->getQuotedName($this);
         }
 
         foreach ($diff->changedColumns AS $columnDiff) {
+            if ($this->onSchemaAlterTableChangeColumn($columnDiff, $diff, $columnSql)) {
+                continue;
+            }
+
             /* @var $columnDiff Doctrine\DBAL\Schema\ColumnDiff */
             $column = $columnDiff->column;
             $queryParts[] = 'ALTER COLUMN ' .
@@ -299,9 +312,19 @@ class MsSqlPlatform extends AbstractPlatform
         }
 
         foreach ($diff->renamedColumns AS $oldColumnName => $column) {
+            if ($this->onSchemaAlterTableRenameColumn($oldColumnName, $column, $diff, $columnSql)) {
+                continue;
+            }
+
             $sql[] = "sp_RENAME '". $diff->name. ".". $oldColumnName . "' , '".$column->getQuotedName($this)."', 'COLUMN'";
             $queryParts[] = 'ALTER COLUMN ' .
                     $this->getColumnDeclarationSQL($column->getQuotedName($this), $column->toArray());
+        }
+        
+        $tableSql = array();
+
+        if ($this->onSchemaAlterTable($diff, $tableSql)) {
+            return array_merge($tableSql, $columnSql); 
         }
 
         foreach ($queryParts as $query) {
@@ -310,7 +333,7 @@ class MsSqlPlatform extends AbstractPlatform
 
         $sql = array_merge($sql, $this->_getAlterTableIndexForeignKeySQL($diff));
 
-        return $sql;
+        return array_merge($sql, $tableSql, $columnSql);
     }
 
     /**
@@ -822,9 +845,17 @@ class MsSqlPlatform extends AbstractPlatform
     {
         return "[" . str_replace("]", "][", $str) . "]";
     }
-    
+
     public function getTruncateTableSQL($tableName, $cascade = false)
     {
         return 'TRUNCATE TABLE '.$tableName;
+    }
+
+    /**
+     * Gets the SQL Snippet used to declare a BLOB column type.
+     */
+    public function getBlobTypeDeclarationSQL(array $field)
+    {
+        return 'VARBINARY(MAX)';
     }
 }
