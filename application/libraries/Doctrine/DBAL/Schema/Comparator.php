@@ -61,20 +61,24 @@ class Comparator
 
         $foreignKeysToTable = array();
 
-        foreach ( $toSchema->getTables() AS $tableName => $table ) {
-            if ( !$fromSchema->hasTable($tableName) ) {
-                $diff->newTables[$tableName] = $table;
+        foreach ( $toSchema->getTables() AS $table ) {
+            $tableName = $table->getShortestName($toSchema->getName());
+            if ( ! $fromSchema->hasTable($tableName)) {
+                $diff->newTables[$tableName] = $toSchema->getTable($tableName);
             } else {
-                $tableDifferences = $this->diffTable( $fromSchema->getTable($tableName), $table );
-                if ( $tableDifferences !== false ) {
+                $tableDifferences = $this->diffTable($fromSchema->getTable($tableName), $toSchema->getTable($tableName));
+                if ($tableDifferences !== false) {
                     $diff->changedTables[$tableName] = $tableDifferences;
                 }
             }
         }
 
         /* Check if there are tables removed */
-        foreach ( $fromSchema->getTables() AS $tableName => $table ) {
-            if ( !$toSchema->hasTable($tableName) ) {
+        foreach ($fromSchema->getTables() AS $table) {
+            $tableName = $table->getShortestName($fromSchema->getName());
+
+            $table = $fromSchema->getTable($tableName);
+            if ( ! $toSchema->hasTable($tableName) ) {
                 $diff->removedTables[$tableName] = $table;
             }
 
@@ -94,7 +98,8 @@ class Comparator
             }
         }
 
-        foreach ( $toSchema->getSequences() AS $sequenceName => $sequence) {
+        foreach ($toSchema->getSequences() AS $sequence) {
+            $sequenceName = $sequence->getShortestName($toSchema->getName());
             if (!$fromSchema->hasSequence($sequenceName)) {
                 $diff->newSequences[] = $sequence;
             } else {
@@ -104,7 +109,8 @@ class Comparator
             }
         }
 
-        foreach ($fromSchema->getSequences() AS $sequenceName => $sequence) {
+        foreach ($fromSchema->getSequences() AS $sequence) {
+            $sequenceName = $sequence->getShortestName($fromSchema->getName());
             if (!$toSchema->hasSequence($sequenceName)) {
                 $diff->removedSequences[] = $sequence;
             }
@@ -163,7 +169,7 @@ class Comparator
                 $changes++;
             }
         }
-        
+
         foreach ( $table1Columns as $columnName => $column ) {
             if ( $table2->hasColumn($columnName) ) {
                 $changedProperties = $this->diffColumn( $column, $table2->getColumn($columnName) );
@@ -241,7 +247,7 @@ class Comparator
     /**
      * Try to find columns that only changed their name, rename operations maybe cheaper than add/drop
      * however ambiguouties between different possibilites should not lead to renaming at all.
-     * 
+     *
      * @param TableDiff $tableDifferences
      */
     private function detectColumnRenamings(TableDiff $tableDifferences)
@@ -278,7 +284,7 @@ class Comparator
         if (array_map('strtolower', $key1->getLocalColumns()) != array_map('strtolower', $key2->getLocalColumns())) {
             return true;
         }
-        
+
         if (array_map('strtolower', $key1->getForeignColumns()) != array_map('strtolower', $key2->getForeignColumns())) {
             return true;
         }

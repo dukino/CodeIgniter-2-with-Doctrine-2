@@ -504,7 +504,7 @@ class MySqlPlatform extends AbstractPlatform
 
         $sql = array();
         $tableSql = array();
-        
+
         if (!$this->onSchemaAlterTable($diff, $tableSql)) {
             if (count($queryParts) > 0) {
                 $sql[] = 'ALTER TABLE ' . $diff->name . ' ' . implode(", ", $queryParts);
@@ -518,6 +518,22 @@ class MySqlPlatform extends AbstractPlatform
 
         return array_merge($sql, $tableSql, $columnSql);
     }
+
+    /**
+     * @override
+     */
+    protected function getCreateIndexSQLFlags(Index $index)
+    {
+        $type = '';
+        if ($index->isUnique()) {
+            $type .= 'UNIQUE ';
+        } else if ($index->hasFlag('fulltext')) {
+            $type .= 'FULLTEXT ';
+        }
+
+        return $type;
+    }
+
 
     /**
      * Obtain DBMS specific SQL code portion needed to declare an integer type
@@ -679,6 +695,10 @@ class MySqlPlatform extends AbstractPlatform
             'decimal'       => 'decimal',
             'numeric'       => 'decimal',
             'year'          => 'date',
+            'longblob'      => 'blob',
+            'blob'          => 'blob',
+            'mediumblob'    => 'blob',
+            'tinyblob'      => 'blob',
         );
     }
 

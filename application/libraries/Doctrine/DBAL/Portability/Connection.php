@@ -32,26 +32,28 @@ class Connection extends \Doctrine\DBAL\Connection
     const PORTABILITY_RTRIM             = 1;
     const PORTABILITY_EMPTY_TO_NULL     = 4;
     const PORTABILITY_FIX_CASE          = 8;
-    
+
     const PORTABILITY_ORACLE            = 9;
     const PORTABILITY_POSTGRESQL        = 13;
     const PORTABILITY_SQLITE            = 13;
     const PORTABILITY_OTHERVENDORS      = 12;
-    
+    const PORTABILITY_DRIZZLE           = 13;
+    const PORTABILITY_SQLSRV            = 13;
+
     /**
      * @var int
      */
     private $portability = self::PORTABILITY_NONE;
-    
+
     /**
      * @var int
      */
     private $case;
-    
+
     public function connect()
     {
         $ret = parent::connect();
-        if ($ret) {       
+        if ($ret) {
             $params = $this->getParams();
             if (isset($params['portability'])) {
                 if ($this->_platform->getName() === "oracle") {
@@ -60,6 +62,10 @@ class Connection extends \Doctrine\DBAL\Connection
                     $params['portability'] = $params['portability'] & self::PORTABILITY_POSTGRESQL;
                 } else if ($this->_platform->getName() === "sqlite") {
                     $params['portability'] = $params['portability'] & self::PORTABILITY_SQLITE;
+                } else if ($this->_platform->getName() === "drizzle") {
+                    $params['portability'] = self::PORTABILITY_DRIZZLE;
+                } else if ($this->_platform->getName() === 'sqlsrv') {
+                    $params['portability'] = $params['portabililty'] & self::PORTABILITY_SQLSRV;
                 } else {
                     $params['portability'] = $params['portability'] & self::PORTABILITY_OTHERVENDORS;
                 }
@@ -72,37 +78,37 @@ class Connection extends \Doctrine\DBAL\Connection
                 } else {
                     $this->case = ($params['fetch_case'] == \PDO::CASE_LOWER) ? CASE_LOWER : CASE_UPPER;
                 }
-            }    
+            }
         }
         return $ret;
     }
-    
+
     public function getPortability()
     {
         return $this->portability;
     }
-    
+
     public function getFetchCase()
     {
         return $this->case;
     }
-    
+
     public function executeQuery($query, array $params = array(), $types = array(), QueryCacheProfile $qcp = null)
     {
         return new Statement(parent::executeQuery($query, $params, $types, $qcp), $this);
     }
-    
+
     /**
      * Prepares an SQL statement.
      *
      * @param string $statement The SQL statement to prepare.
-     * @return Doctrine\DBAL\Driver\Statement The prepared statement.
+     * @return \Doctrine\DBAL\Driver\Statement The prepared statement.
      */
     public function prepare($statement)
     {
         return new Statement(parent::prepare($statement), $this);
     }
-    
+
     public function query()
     {
         $this->connect();

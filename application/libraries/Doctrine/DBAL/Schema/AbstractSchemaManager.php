@@ -76,7 +76,7 @@ abstract class AbstractSchemaManager
     }
 
     /**
-     * Try any method on the schema manager. Normally a method throws an 
+     * Try any method on the schema manager. Normally a method throws an
      * exception when your DBMS doesn't support it or if an error occurs.
      * This method allows you to try and method on your SchemaManager
      * instance and will return false if it does not work or is not supported.
@@ -129,7 +129,7 @@ abstract class AbstractSchemaManager
 
         $sequences = $this->_conn->fetchAll($sql);
 
-        return $this->_getPortableSequencesList($sequences);
+        return $this->filterAssetNames($this->_getPortableSequencesList($sequences));
     }
 
     /**
@@ -178,7 +178,7 @@ abstract class AbstractSchemaManager
 
     /**
      * Return true if all the given tables exist.
-     * 
+     *
      * @param array $tableNames
      * @return bool
      */
@@ -187,7 +187,6 @@ abstract class AbstractSchemaManager
         $tableNames = array_map('strtolower', (array)$tableNames);
         return count($tableNames) == count(\array_intersect($tableNames, array_map('strtolower', $this->listTableNames())));
     }
-
 
     /**
      * Return a list of all tables in the current database
@@ -199,8 +198,34 @@ abstract class AbstractSchemaManager
         $sql = $this->_platform->getListTablesSQL();
 
         $tables = $this->_conn->fetchAll($sql);
+        $tableNames = $this->_getPortableTablesList($tables);
+        return $this->filterAssetNames($tableNames);
+    }
 
-        return $this->_getPortableTablesList($tables);
+    /**
+     * Filter asset names if they are configured to return only a subset of all
+     * the found elements.
+     *
+     * @param array $assetNames
+     * @return array
+     */
+    protected function filterAssetNames($assetNames)
+    {
+        $filterExpr = $this->getFilterSchemaAssetsExpression();
+        if (!$filterExpr) {
+            return $assetNames;
+        }
+        return array_values (
+            array_filter($assetNames, function ($assetName) use ($filterExpr) {
+                $assetName = ($assetName instanceof AbstractAsset) ? $assetName->getName() : $assetName;
+                return preg_match('(' . $filterExpr . ')', $assetName);
+            })
+        );
+    }
+
+    protected function getFilterSchemaAssetsExpression()
+    {
+        return $this->_conn->getConfiguration()->getFilterSchemaAssetsExpression();
     }
 
     /**
@@ -271,7 +296,7 @@ abstract class AbstractSchemaManager
 
     /**
      * Drops a database.
-     * 
+     *
      * NOTE: You can not drop the database this SchemaManager is currently connected to.
      *
      * @param string $database The name of the database to drop
@@ -476,8 +501,8 @@ abstract class AbstractSchemaManager
      */
     public function dropAndCreateSequence(Sequence $sequence)
     {
-        $this->tryMethod('createSequence', $seqName, $start, $allocationSize);
-        $this->createSequence($seqName, $start, $allocationSize);
+        $this->tryMethod('dropSequence', $sequence->getQuotedName($this->_platform));
+        $this->createSequence($sequence);
     }
 
     /**
@@ -686,6 +711,7 @@ abstract class AbstractSchemaManager
                     'columns' => array($tableIndex['column_name']),
                     'unique' => $tableIndex['non_unique'] ? false : true,
                     'primary' => $tableIndex['primary'],
+                    'flags' => isset($tableIndex['flags']) ? $tableIndex['flags'] : array(),
                 );
             } else {
                 $result[$keyName]['columns'][] = $tableIndex['column_name'];
@@ -708,7 +734,7 @@ abstract class AbstractSchemaManager
             }
 
             if (!$defaultPrevented) {
-                $index = new Index($data['name'], $data['columns'], $data['unique'], $data['primary']);
+                $index = new Index($data['name'], $data['columns'], $data['unique'], $data['primary'], $data['flags']);
             }
 
             if ($index) {
@@ -793,7 +819,7 @@ abstract class AbstractSchemaManager
 
     /**
      * Create a schema instance for the current database.
-     * 
+     *
      * @return Schema
      */
     public function createSchema()
@@ -817,20 +843,42 @@ abstract class AbstractSchemaManager
         $schemaConfig = new SchemaConfig();
         $schemaConfig->setMaxIdentifierLength($this->_platform->getMaxIdentifierLength());
 
+        $searchPaths = $this->getSchemaSearchPaths();
+        if (isset($searchPaths[0])) {
+            $schemaConfig->setName($searchPaths[0]);
+        }
+
         return $schemaConfig;
+    }
+
+    /**
+     * The search path for namespaces in the currently connected database.
+     *
+     * The first entry is usually the default namespace in the Schema. All
+     * further namespaces contain tables/sequences which can also be addressed
+     * with a short, not full-qualified name.
+     *
+     * For databases that don't support subschema/namespaces this method
+     * returns the name of the currently connected database.
+     *
+     * @return array
+     */
+    public function getSchemaSearchPaths()
+    {
+        return array($this->_conn->getDatabase());
     }
 
     /**
      * Given a table comment this method tries to extract a typehint for Doctrine Type, or returns
      * the type given as default.
-     * 
+     *
      * @param  string $comment
      * @param  string $currentType
      * @return string
      */
     public function extractDoctrineTypeFromComment($comment, $currentType)
     {
-        if (preg_match("(\(DC2Type:([a-zA-Z0-9]+)\))", $comment, $match)) {
+        if (preg_match("(\(DC2Type:([a-zA-Z0-9_]+)\))", $comment, $match)) {
             $currentType = $match[1];
         }
         return $currentType;

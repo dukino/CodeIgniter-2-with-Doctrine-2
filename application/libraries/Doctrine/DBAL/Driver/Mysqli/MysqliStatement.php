@@ -99,7 +99,7 @@ class MysqliStatement implements \IteratorAggregate, Statement
         }
 
         $this->_bindedValues[$column] =& $variable;
-        $this->_bindedValues[0][$column - 1] = 's';
+        $this->_bindedValues[0][$column - 1] = $type;
         return true;
     }
 
@@ -120,7 +120,7 @@ class MysqliStatement implements \IteratorAggregate, Statement
 
         $this->_values[$param] = $value;
         $this->_bindedValues[$param] =& $this->_values[$param];
-        $this->_bindedValues[0][$param - 1] = 's';
+        $this->_bindedValues[0][$param - 1] = $type;
         return true;
     }
 
@@ -179,7 +179,7 @@ class MysqliStatement implements \IteratorAggregate, Statement
 
     /**
      * Bind a array of values to bound parameters
-     * 
+     *
      * @param array $values
      * @return boolean
      */

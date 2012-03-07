@@ -48,7 +48,7 @@ class Statement implements \IteratorAggregate, \Doctrine\DBAL\Driver\Statement
      */
     private $case;
 
-    /** 
+    /**
      * @var int
      */
     private $defaultFetchStyle = PDO::FETCH_BOTH;
@@ -56,8 +56,8 @@ class Statement implements \IteratorAggregate, \Doctrine\DBAL\Driver\Statement
     /**
      * Wraps <tt>Statement</tt> and applies portability measures
      *
-     * @param Doctrine\DBAL\Driver\Statement $stmt
-     * @param Doctrine\DBAL\Connection $conn
+     * @param \Doctrine\DBAL\Driver\Statement $stmt
+     * @param \Doctrine\DBAL\Connection $conn
      */
     public function __construct($stmt, Connection $conn)
     {
