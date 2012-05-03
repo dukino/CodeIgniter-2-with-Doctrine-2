@@ -2,7 +2,7 @@
 /**
  * CodeIgniter
  *
- * An open source application development framework for PHP 5.1.6 or newer
+ * An open source application development framework for PHP 5.2.4 or newer
  *
  * NOTICE OF LICENSE
  *
@@ -22,10 +22,7 @@
  * @license		http://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
  * @link		http://codeigniter.com
  * @since		Version 1.0
- * @filesource
  */
-
-// ------------------------------------------------------------------------
 
 /**
  * URI Class
@@ -45,26 +42,29 @@ class CI_URI {
 	 *
 	 * @var array
 	 */
-	public $keyval		= array();
+	public $keyval =	array();
+	
 	/**
 	 * Current uri string
 	 *
 	 * @var string
 	 */
 	public $uri_string;
+	
 	/**
 	 * List of uri segments
 	 *
 	 * @var array
 	 */
-	public $segments	= array();
+	public $segments =	array();
+	
 	/**
 	 * Re-indexed list of uri segments
 	 * Starts at 1 instead of 0
 	 *
 	 * @var array
 	 */
-	public $rsegments	= array();
+	public $rsegments =	array();
 
 	/**
 	 * Constructor
@@ -93,7 +93,7 @@ class CI_URI {
 		if (strtoupper($this->config->item('uri_protocol')) === 'AUTO')
 		{
 			// Is the request coming from the command line?
-			if (php_sapi_name() === 'cli' OR defined('STDIN'))
+			if ($this->_is_cli_request())
 			{
 				$this->_set_uri_string($this->_parse_cli_args());
 				return;
@@ -227,6 +227,21 @@ class CI_URI {
 	}
 
 	// --------------------------------------------------------------------
+	
+	/**
+	 * Is cli Request?
+	 *
+	 * Duplicate of function from the Input class to test to see if a request was made from the command line
+	 *
+	 * @return 	boolean
+	 */
+	protected function _is_cli_request()
+	{
+		return (php_sapi_name() == 'cli') OR defined('STDIN');
+	}
+
+	
+	// --------------------------------------------------------------------
 
 	/**
 	 * Parse cli arguments
@@ -312,6 +327,7 @@ class CI_URI {
 	}
 
 	// --------------------------------------------------------------------
+	
 	/**
 	 * Re-index Segments
 	 *
@@ -392,6 +408,9 @@ class CI_URI {
 	{
 		return $this->_uri_to_assoc($n, $default, 'segment');
 	}
+	
+	// --------------------------------------------------------------------
+	
 	/**
 	 * Identical to above only it uses the re-routed segment array
 	 *
@@ -444,9 +463,7 @@ class CI_URI {
 				return array();
 			}
 
-			return function_exists('array_fill_keys')
-				? array_fill_keys($default, FALSE)
-				: array_combine($default, array_fill(0, count($default), FALSE));
+			return array_fill_keys($default, FALSE);
 		}
 
 		$segments = array_slice($this->$segment_array(), ($n - 1));
@@ -488,7 +505,6 @@ class CI_URI {
 
 	/**
 	 * Generate a URI string from an associative array
-	 *
 	 *
 	 * @param	array	an associative array of key/values
 	 * @return	array

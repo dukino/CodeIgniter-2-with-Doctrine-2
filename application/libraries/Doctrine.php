@@ -42,7 +42,7 @@ class Doctrine {
 		$config = new Configuration;
 
 		// Metadata driver
-		$driverImpl = $config->newDefaultAnnotationDriver(APPPATH . 'models');	
+		$driverImpl = $config->newDefaultAnnotationDriver(APPPATH . 'models');
 		$config->setMetadataDriverImpl($driverImpl);
 
 		// Caching

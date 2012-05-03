@@ -2,7 +2,7 @@
 /**
  * CodeIgniter
  *
- * An open source application development framework for PHP 5.1.6 or newer
+ * An open source application development framework for PHP 5.2.4 or newer
  *
  * NOTICE OF LICENSE
  *
@@ -25,8 +25,6 @@
  * @filesource
  */
 
-// ------------------------------------------------------------------------
-
 /**
  * CodeIgniter Application Controller Class
  *
@@ -41,8 +39,16 @@
  */
 class CI_Controller {
 
+	/**
+	 * Reference to the global CI instance
+	 *
+	 * @var	object
+	 */
 	private static $instance;
 
+	/**
+	 * Set up controller properties and methods
+	 */
 	public function __construct()
 	{
 		self::$instance =& $this;
@@ -60,6 +66,11 @@ class CI_Controller {
 		log_message('debug', 'Controller Class Initialized');
 	}
 
+	/**
+	 * Return the CI object 
+	 *
+	 * @return object
+	 */
 	public static function &get_instance()
 	{
 		return self::$instance;
