@@ -17,36 +17,14 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\ORM\Query\Expr;
+namespace Doctrine\ORM\Mapping;
 
 /**
- * Expression class for generating DQL functions
- *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
- * @author  Jonathan Wage <jonwage@gmail.com>
- * @author  Roman Borschel <roman@code-factory.org>
+ * @Annotation
+ * @Target("PROPERTY")
  */
-class Literal extends Base
+final class CustomIdGenerator implements Annotation
 {
-    /**
-     * @var string
-     */
-    protected $preSeparator  = '';
-
-    /**
-     * @var string
-     */
-    protected $postSeparator = '';
-
-    /**
-     * @return array
-     */
-    public function getParts()
-    {
-        return $this->parts;
-    }
-
+    /** @var string */
+    public $class;
 }

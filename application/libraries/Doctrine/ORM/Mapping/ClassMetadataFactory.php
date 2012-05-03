@@ -326,6 +326,14 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
                 $this->addInheritedNamedQueries($class, $parent);
             }
 
+            if ($parent && !empty ($parent->namedNativeQueries)) {
+                $this->addInheritedNamedNativeQueries($class, $parent);
+            }
+
+            if ($parent && !empty ($parent->sqlResultSetMappings)) {
+                $this->addInheritedSqlResultSetMappings($class, $parent);
+            }
+
             $class->setParentClasses($visited);
 
             if ($this->evm->hasListeners(Events::loadClassMetadata)) {
@@ -406,7 +414,7 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
      */
     private function addInheritedFields(ClassMetadata $subClass, ClassMetadata $parentClass)
     {
-        foreach ($parentClass->fieldMappings as $fieldName => $mapping) {
+        foreach ($parentClass->fieldMappings as $mapping) {
             if ( ! isset($mapping['inherited']) && ! $parentClass->isMappedSuperclass) {
                 $mapping['inherited'] = $parentClass->name;
             }
@@ -467,6 +475,58 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
     }
 
     /**
+     * Adds inherited named native queries to the subclass mapping.
+     *
+     * @since 2.3
+     * @param \Doctrine\ORM\Mapping\ClassMetadata $subClass
+     * @param \Doctrine\ORM\Mapping\ClassMetadata $parentClass
+     */
+    private function addInheritedNamedNativeQueries(ClassMetadata $subClass, ClassMetadata $parentClass)
+    {
+        foreach ($parentClass->namedNativeQueries as $name => $query) {
+            if (!isset ($subClass->namedNativeQueries[$name])) {
+                $subClass->addNamedNativeQuery(array(
+                    'name'              => $query['name'],
+                    'query'             => $query['query'],
+                    'isSelfClass'       => $query['isSelfClass'],
+                    'resultSetMapping'  => $query['resultSetMapping'],
+                    'resultClass'       => $query['isSelfClass'] ? $subClass->name : $query['resultClass'],
+                ));
+            }
+        }
+    }
+
+    /**
+     * Adds inherited sql result set mappings to the subclass mapping.
+     *
+     * @since 2.3
+     * @param \Doctrine\ORM\Mapping\ClassMetadata $subClass
+     * @param \Doctrine\ORM\Mapping\ClassMetadata $parentClass
+     */
+    private function addInheritedSqlResultSetMappings(ClassMetadata $subClass, ClassMetadata $parentClass)
+    {
+        foreach ($parentClass->sqlResultSetMappings as $name => $mapping) {
+            if (!isset ($subClass->sqlResultSetMappings[$name])) {
+                $entities = array();
+                foreach ($mapping['entities'] as $entity) {
+                    $entities[] = array(
+                        'fields'                => $entity['fields'],
+                        'isSelfClass'           => $entity['isSelfClass'],
+                        'discriminatorColumn'   => $entity['discriminatorColumn'],
+                        'entityClass'           => $entity['isSelfClass'] ? $subClass->name : $entity['entityClass'],
+                    );
+                }
+
+                $subClass->addSqlResultSetMapping(array(
+                    'name'          => $mapping['name'],
+                    'columns'       => $mapping['columns'],
+                    'entities'      => $entities,
+                ));
+            }
+        }
+    }
+
+    /**
      * Completes the ID generator mapping. If "auto" is specified we choose the generator
      * most appropriate for the targeted database platform.
      *
@@ -515,8 +575,19 @@ class ClassMetadataFactory implements ClassMetadataFactoryInterface
             case ClassMetadata::GENERATOR_TYPE_NONE:
                 $class->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
                 break;
+            case ClassMetadata::GENERATOR_TYPE_UUID:
+                $class->setIdGenerator(new \Doctrine\ORM\Id\UuidGenerator());
+                break;
             case ClassMetadata::GENERATOR_TYPE_TABLE:
                 throw new ORMException("TableGenerator not yet implemented.");
+                break;
+            case ClassMetadata::GENERATOR_TYPE_CUSTOM:
+                $definition = $class->customGeneratorDefinition;
+                if (!class_exists($definition['class'])) {
+                    throw new ORMException("Can't instantiate custom generator : " .
+                        $definition['class']);
+                }
+                $class->setIdGenerator(new $definition['class']);
                 break;
             default:
                 throw new ORMException("Unknown generator type: " . $class->generatorType);

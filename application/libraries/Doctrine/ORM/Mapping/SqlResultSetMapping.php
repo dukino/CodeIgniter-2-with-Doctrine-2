@@ -17,36 +17,40 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\ORM\Query\Expr;
+namespace Doctrine\ORM\Mapping;
 
 /**
- * Expression class for generating DQL functions
+ * The SqlResultSetMapping annotation is used to specify the mapping of the result of a native SQL query.
+ * The SqlResultSetMapping annotation can be applied to an entity or mapped superclass.
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
- * @author  Jonathan Wage <jonwage@gmail.com>
- * @author  Roman Borschel <roman@code-factory.org>
+ * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
+ * @since   2.3
+ *
+ * @Annotation
+ * @Target("ANNOTATION")
  */
-class Literal extends Base
+final class SqlResultSetMapping implements Annotation
 {
-    /**
-     * @var string
-     */
-    protected $preSeparator  = '';
 
     /**
+     * The name given to the result set mapping, and used to refer to it in the methods of the Query API.
+     * 
      * @var string
      */
-    protected $postSeparator = '';
+    public $name;
 
     /**
-     * @return array
+     * Specifies the result set mapping to entities.
+     * 
+     * @var array<\Doctrine\ORM\Mapping\EntityResult>
      */
-    public function getParts()
-    {
-        return $this->parts;
-    }
+    public $entities = array();
+
+    /**
+     * Specifies the result set mapping to scalar values.
+     *
+     * @var array<\Doctrine\ORM\Mapping\ColumnResult>
+     */
+    public $columns = array();
 
 }

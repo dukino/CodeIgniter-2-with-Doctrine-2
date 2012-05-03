@@ -17,36 +17,32 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\ORM\Query\Expr;
+namespace Doctrine\ORM\Mapping;
 
 /**
- * Expression class for generating DQL functions
+ * Is used to map the columns specified in the SELECT list of the query to the properties or fields of the entity class.
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
- * @author  Jonathan Wage <jonwage@gmail.com>
- * @author  Roman Borschel <roman@code-factory.org>
+ * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
+ * @since   2.3
+ *
+ * @Annotation
+ * @Target("ANNOTATION")
  */
-class Literal extends Base
+final class FieldResult implements Annotation
 {
-    /**
-     * @var string
-     */
-    protected $preSeparator  = '';
 
     /**
+     * Name of the column in the SELECT clause.
+     *
      * @var string
      */
-    protected $postSeparator = '';
+    public $name;
 
     /**
-     * @return array
+     *  Name of the persistent field or property of the class.
+     *
+     * @var string
      */
-    public function getParts()
-    {
-        return $this->parts;
-    }
+    public $column;
 
 }

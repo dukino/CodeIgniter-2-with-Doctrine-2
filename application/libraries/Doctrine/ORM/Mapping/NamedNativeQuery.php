@@ -17,25 +17,47 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\Common\DateTime;
+namespace Doctrine\ORM\Mapping;
 
 /**
- * Thrown if a method is called on the Doctrine DateTime that semantically would change the
- * inner state of the instance, hence immutability has to be enforced.
- * 
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   3.0
- * @author  Benjamin Eberlei <kontakt@beberlei.de>
+ * Is used to specify a native SQL named query.
+ * The NamedNativeQuery annotation can be applied to an entity or mapped superclass.
+ *
+ * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
+ * @since   2.3
+ *
+ * @Annotation
+ * @Target("ANNOTATION")
  */
-class ImmutableException extends \Exception
+final class NamedNativeQuery implements Annotation
 {
-    public function __construct()
-    {
-        parent::__construct(
-            "Cannot modify Doctrine\Common\DateTime\DateTime instance, its immutable. ".
-            "You can use #modify(), #add() and #sub() and work with the newly created instances " .
-            "that are returned."
-        );
-    }
+
+    /**
+     * The name used to refer to the query with the EntityManager methods that create query objects.
+     *
+     * @var string
+     */
+    public $name;
+
+    /**
+     * The SQL query string.
+     *
+     * @var string 
+     */
+    public $query;
+
+    /**
+     * The class of the result.
+     *
+     * @var string
+     */
+    public $resultClass;
+
+    /**
+     * The name of a SqlResultSetMapping, as defined in metadata.
+     * 
+     * @var string
+     */
+    public $resultSetMapping;
+
 }

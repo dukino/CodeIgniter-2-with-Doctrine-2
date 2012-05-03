@@ -17,36 +17,42 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\ORM\Query\Expr;
+namespace Doctrine\ORM\Mapping;
 
 /**
- * Expression class for generating DQL functions
+ * References an entity in the SELECT clause of a SQL query.
+ * If this annotation is used, the SQL statement should select all of the columns that are mapped to the entity object.
+ * This should include foreign key columns to related entities.
+ * The results obtained when insufficient data is available are undefined.
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
- * @author  Jonathan Wage <jonwage@gmail.com>
- * @author  Roman Borschel <roman@code-factory.org>
+ * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
+ * @since   2.3
+ *
+ * @Annotation
+ * @Target("ANNOTATION")
  */
-class Literal extends Base
+final class EntityResult implements Annotation
 {
-    /**
-     * @var string
-     */
-    protected $preSeparator  = '';
 
     /**
+     * The class of the result
+     *
      * @var string
      */
-    protected $postSeparator = '';
+    public $entityClass;
 
     /**
-     * @return array
+     * Maps the columns specified in the SELECT list of the query to the properties or fields of the entity class.
+     *
+     * @var array<\Doctrine\ORM\Mapping\FieldResult>
      */
-    public function getParts()
-    {
-        return $this->parts;
-    }
+    public $fields = array();
+
+    /**
+     * Specifies the column name of the column in the SELECT list that is used to determine the type of the entity instance.
+     *
+     * @var string
+     */
+    public $discriminatorColumn;
 
 }

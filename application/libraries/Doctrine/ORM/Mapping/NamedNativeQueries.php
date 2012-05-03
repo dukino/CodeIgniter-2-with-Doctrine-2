@@ -17,36 +17,24 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\ORM\Query\Expr;
+namespace Doctrine\ORM\Mapping;
 
 /**
- * Expression class for generating DQL functions
+ * Is used to specify an array of native SQL named queries.
+ * The NamedNativeQueries annotation can be applied to an entity or mapped superclass.
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
- * @author  Jonathan Wage <jonwage@gmail.com>
- * @author  Roman Borschel <roman@code-factory.org>
+ * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
+ * @since   2.3
+ * 
+ * @Annotation
+ * @Target("CLASS")
  */
-class Literal extends Base
+final class NamedNativeQueries implements Annotation
 {
     /**
-     * @var string
+     * One or more NamedNativeQuery annotations.
+     *
+     * @var array<\Doctrine\ORM\Mapping\NamedNativeQuery>
      */
-    protected $preSeparator  = '';
-
-    /**
-     * @var string
-     */
-    protected $postSeparator = '';
-
-    /**
-     * @return array
-     */
-    public function getParts()
-    {
-        return $this->parts;
-    }
-
+    public $value = array();
 }

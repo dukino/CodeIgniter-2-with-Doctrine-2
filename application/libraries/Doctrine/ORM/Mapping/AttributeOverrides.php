@@ -17,36 +17,25 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\ORM\Query\Expr;
+namespace Doctrine\ORM\Mapping;
 
 /**
- * Expression class for generating DQL functions
+ * This annotation is used to override the mapping of a entity property.
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
- * @author  Jonathan Wage <jonwage@gmail.com>
- * @author  Roman Borschel <roman@code-factory.org>
+ * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
+ * @since   2.3
+ *
+ * @Annotation
+ * @Target("CLASS")
  */
-class Literal extends Base
+final class AttributeOverrides implements Annotation
 {
-    /**
-     * @var string
-     */
-    protected $preSeparator  = '';
 
     /**
-     * @var string
+     * One or more field or property mapping overrides.
+     *
+     * @var array<\Doctrine\ORM\Mapping\AttributeOverride>
      */
-    protected $postSeparator = '';
-
-    /**
-     * @return array
-     */
-    public function getParts()
-    {
-        return $this->parts;
-    }
+    public $value;
 
 }

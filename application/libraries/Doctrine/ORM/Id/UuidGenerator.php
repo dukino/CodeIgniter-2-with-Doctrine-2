@@ -17,36 +17,32 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\ORM\Query\Expr;
+namespace Doctrine\ORM\Id;
+
+use Serializable, Doctrine\ORM\EntityManager;
 
 /**
- * Expression class for generating DQL functions
+ * Represents an ID generator that uses the database UUID expression
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @author  Guilherme Blanco <guilhermeblanco@hotmail.com>
- * @author  Jonathan Wage <jonwage@gmail.com>
- * @author  Roman Borschel <roman@code-factory.org>
+ * @since 2.3
+ * @author Maarten de Keizer <m.de.keizer@markei.nl>
  */
-class Literal extends Base
+class UuidGenerator extends AbstractIdGenerator
 {
+    
     /**
-     * @var string
+     * Generates an ID for the given entity.
+     *
+     * @param Doctrine\ORM\EntityManager $em The EntityManager to user
+     * @param object $entity
+     * @return string The generated value.
+     * @override
      */
-    protected $preSeparator  = '';
-
-    /**
-     * @var string
-     */
-    protected $postSeparator = '';
-
-    /**
-     * @return array
-     */
-    public function getParts()
+    public function generate(EntityManager $em, $entity)
     {
-        return $this->parts;
+        $conn = $em->getConnection();
+        $sql = 'SELECT ' . $conn->getDatabasePlatform()->getGuidExpression();
+        return $conn->query($sql)->fetchColumn(0);
     }
-
+    
 }
