@@ -103,28 +103,36 @@
 	<h1>Welcome to CodeIgniter with Doctrine!</h1>
 
 	<div id="body">
-		<p>This install of CodeIgniter with Doctrine 2 has been created and configured by Joseph Wynn from <a href="http://wildlyinaccurate.com/">Wildly Inaccurate</a>.</p>
+		<p>This installation of CodeIgniter with Doctrine 2 has been created and configured by Joseph Wynn from <a href="http://wildlyinaccurate.com/">Wildly Inaccurate</a>.</p>
 
-		<p>You can access the Doctrine EntityManager in your controllers through the Doctrine library:</p>
+		<p>You can access the Doctrine Entity Manager in your controllers through the Doctrine library:</p>
 		<code>$this->load->library('doctrine');<br />
 		$em = $this->doctrine->em;</code>
 
 		<p>Or through the shortcut property in MY_Controller:</p>
 		<code>$this->em;</code>
 
-		<p>A sample model has been created for you in:</p>
-		<code>application/models/User.php</code>
+		<p>Two sample models has been created for you in:</p>
+		<pre>application/models/Entity/User.php
+		application/models/Entity/Group.php</pre>
 
-		<p>The following code was used in the Welcome controller to create a new User entity.</p>
-		<code>$user = new models\User;<br />
-		$user->setUsername('josephwynn');<br />
-		$user->setPassword('Passw0rd');<br />
-		$user->setEmail('wildlyinaccurate@gmail.com');</code>
+		<p>The following code was used in the Welcome controller to create new User and Group entities.</p>
+		<pre>$group = new Entity\Group;
+$group->setName('Users');
 
-		<p>Below is the output of print_r($user):</p>
+$user = new Entity\User;
+$user->setUsername('wildlyinaccurate');
+$user->setPassword('Passw0rd');
+$user->setEmail('wildlyinaccurate@gmail.com');
+$user->setGroup($group);</pre>
+
+		<p>Below is the output of <code class="inline">print_r($user)</code>:</p>
 		<pre><?php print_r($user); ?></pre>
 
-		<p>The Doctrine console is ready for you to use. Just run <code class="inline"># ./application/doctrine</code> on Linux & Mac, or <code class="inline"># php.exe ./application/doctrine.php</code> on Windows.</p>
+		<p>And <code class="inline">print_r($group)</code>:</p>
+		<pre><?php print_r($group); ?></pre>
+
+		<p>The Doctrine console is ready for you to use. Just run <code class="inline">./application/doctrine</code> on Linux & Mac, or <code class="inline">php.exe ./application/doctrine.php</code> on Windows.</p>
 
 		<p>For more information about integrating Doctrine with CodeIgniter, read <em><a href="http://wildlyinaccurate.com/integrating-doctrine-2-with-codeigniter-2/">Integrating Doctrine 2 with CodeIgniter 2</a></em>.</p>
 
